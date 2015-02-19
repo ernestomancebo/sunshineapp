@@ -10,4 +10,7 @@
     <string name="min_Temp">8</string>
     <string name="weather">Cloudy</string>
 
+    <!--Menu labels/titles-->
+    <string name="refresh">Refresh</string>
+
 </resources>
