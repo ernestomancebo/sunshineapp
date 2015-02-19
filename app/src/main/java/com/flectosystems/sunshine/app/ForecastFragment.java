@@ -1,5 +1,6 @@
 package com.flectosystems.sunshine.app;
 
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,6 +13,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import com.flectosystems.sunshine.app.models.Constants;
+import com.flectosystems.sunshine.app.models.ForecastRequest;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -76,8 +80,10 @@ public class ForecastFragment extends Fragment {
         int id = item.getItemId();
 
         if (id == R.id.action_refresh) {
+            ForecastRequest request = new ForecastRequest("94043");
             FetchWeatherTask task = new FetchWeatherTask();
-            task.execute();
+
+            task.execute(request);
 
             return true;
         }
@@ -85,10 +91,10 @@ public class ForecastFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    class FetchWeatherTask extends AsyncTask<Void, Void, Void> {
+    class FetchWeatherTask extends AsyncTask<ForecastRequest, Void, Void> {
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected Void doInBackground(ForecastRequest... params) {
 
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
@@ -100,7 +106,17 @@ public class ForecastFragment extends Fragment {
                 // Construct the URL for the OpenWeatherMap query
                 // Possible parameters are available at OWM's forecast API page, at
                 // http://openweathermap.org/API#forecast
-                URL url = new URL("http://api.openweathermap.org/data/2.5/forecast/daily?q=94043&mode=json&units=metric&cnt=7");
+                Uri.Builder builder = new Uri.Builder();
+                builder.encodedPath("http://api.openweathermap.org/data/2.5/forecast/daily");
+
+                ForecastRequest req = params[0];
+
+                builder.appendQueryParameter(Constants.PARAM_QUERY, req.postalCode);
+                builder.appendQueryParameter(Constants.PARAM_MODE, req.mode.getMode());
+                builder.appendQueryParameter(Constants.PARAM_UNITS, req.unit.getUnit());
+                builder.appendQueryParameter(Constants.PARAM_COUNT, String.valueOf(req.count));
+
+                URL url = new URL(builder.toString());
                 // Create the request to OpenWeatherMap, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
@@ -127,6 +143,8 @@ public class ForecastFragment extends Fragment {
                 } else {
                     forecastJsonStr = buffer.toString();
                 }
+
+                Log.v(LOG_TAG, forecastJsonStr);
 
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
