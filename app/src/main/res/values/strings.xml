@@ -4,13 +4,15 @@
     <string name="app_name">Sunshine</string>
     <string name="action_settings">Settings</string>
 
-    <!--Fragment labels-->
+    <!-- Fragment labels -->
     <string name="today">Today, </string>
     <string name="max_temp">24</string>
     <string name="min_Temp">8</string>
     <string name="weather">Cloudy</string>
 
-    <!--Menu labels/titles-->
+    <!-- Menu labels/titles -->
     <string name="refresh">Refresh</string>
+    <string name="title_activity_detail">DetailActivity</string>
+    <string name="hello_world">Hello world!</string>
 
 </resources>
