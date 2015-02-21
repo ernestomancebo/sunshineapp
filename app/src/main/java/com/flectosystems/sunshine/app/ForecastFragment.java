@@ -14,8 +14,11 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.flectosystems.sunshine.app.Utils.JsonForecastUtil;
 import com.flectosystems.sunshine.app.models.Constants;
 import com.flectosystems.sunshine.app.models.ForecastRequest;
+
+import org.json.JSONException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,6 +27,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by ernesto on 17/02/15.
@@ -31,6 +35,7 @@ import java.util.ArrayList;
 public class ForecastFragment extends Fragment {
 
     private final String LOG_TAG = ForecastFragment.class.getSimpleName();
+    ArrayAdapter<String> adapter;
 
     public ForecastFragment() {
     }
@@ -47,7 +52,7 @@ public class ForecastFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        ArrayList<String> forecastEntry = new ArrayList<>();
+        List<String> forecastEntry = new ArrayList<>();
 
         forecastEntry.add("Today, Sunny");
         forecastEntry.add("Tomorrow, Rainy");
@@ -55,7 +60,7 @@ public class ForecastFragment extends Fragment {
         forecastEntry.add("Sun, Cloudy");
 
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+        adapter = new ArrayAdapter<String>(
                 getActivity(),
                 R.layout.list_item_forecast,
                 R.id.list_item_forecast_textview,
@@ -85,16 +90,18 @@ public class ForecastFragment extends Fragment {
 
             task.execute(request);
 
+            ListView l = (ListView) getActivity().findViewById(R.id.listview_forecast);
+
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    class FetchWeatherTask extends AsyncTask<ForecastRequest, Void, Void> {
+    class FetchWeatherTask extends AsyncTask<ForecastRequest, String[], String[]> {
 
         @Override
-        protected Void doInBackground(ForecastRequest... params) {
+        protected String[] doInBackground(ForecastRequest... params) {
 
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
@@ -144,13 +151,17 @@ public class ForecastFragment extends Fragment {
                     forecastJsonStr = buffer.toString();
                 }
 
-                Log.v(LOG_TAG, forecastJsonStr);
+                String[] rv = JsonForecastUtil.getWeatherDataFromJson(forecastJsonStr, 7);
+                Log.v(LOG_TAG, rv[1]);
 
+                return rv;
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
                 // If the code didn't successfully get the weather data, there's no point in attempting
                 // to parse it.
                 forecastJsonStr = null;
+            } catch (JSONException e) {
+                Log.e(LOG_TAG, "Error ", e);
             } finally {
                 if (urlConnection != null) {
                     urlConnection.disconnect();
@@ -165,6 +176,19 @@ public class ForecastFragment extends Fragment {
             }
 
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(String[] strings) {
+            super.onPostExecute(strings);
+
+            adapter.clear();
+
+            // addAll() method is available since api 11, current api is 10. Shit :\
+            for (String s : strings)
+                adapter.add(s)
+                        ;
+            adapter.notifyDataSetChanged();
         }
     }
 }
