@@ -1,6 +1,8 @@
 package com.flectosystems.sunshine.app;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -40,6 +42,12 @@ public class ForecastFragment extends Fragment {
     ArrayAdapter<String> adapter;
 
     public ForecastFragment() {
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateWeather();
     }
 
     @Override
@@ -96,17 +104,27 @@ public class ForecastFragment extends Fragment {
         int id = item.getItemId();
 
         if (id == R.id.action_refresh) {
-            ForecastRequest request = new ForecastRequest("94043");
-            FetchWeatherTask task = new FetchWeatherTask();
-
-            task.execute(request);
-
-            ListView l = (ListView) getActivity().findViewById(R.id.listview_forecast);
-
+            updateWeather();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void updateWeather() {
+        // Read preferences
+        SharedPreferences preferences = getActivity().getPreferences(Context.MODE_MULTI_PROCESS);
+
+        String postCode = preferences.getString(
+                getString(R.string.pref_location_key), getString(R.string.pref_location_default)
+        );
+
+        Log.v(LOG_TAG, "Postal Code: " + postCode);
+
+        ForecastRequest request = new ForecastRequest(postCode);
+        FetchWeatherTask task = new FetchWeatherTask();
+
+        task.execute(request);
     }
 
     class FetchWeatherTask extends AsyncTask<ForecastRequest, String[], String[]> {

@@ -15,4 +15,12 @@
     <string name="title_activity_detail">DetailActivity</string>
     <string name="hello_world">Hello world!</string>
 
+    <!--Preferences Label-->
+    <string name="pref_location_label">Location</string>
+    <!--Preferences keys-->
+    <string name="pref_location_key" translatable="false">key_location</string>
+    <string name="pref_units_key" translatable="false">key_units</string>
+    <!--Preferences default-->
+    <string name="pref_location_default" translatable="false">94043</string>
+    <string name="pref_units_default" translatable="false">metric</string>
 </resources>
