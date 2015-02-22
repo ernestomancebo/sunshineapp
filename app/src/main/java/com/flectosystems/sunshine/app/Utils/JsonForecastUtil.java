@@ -1,7 +1,13 @@
 package com.flectosystems.sunshine.app.Utils;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.text.format.Time;
 import android.util.Log;
+
+import com.flectosystems.sunshine.app.R;
+import com.flectosystems.sunshine.app.models.ForecastRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,8 +35,14 @@ public final class JsonForecastUtil {
     /**
      * Prepare the weather high/lows for presentation.
      */
-    public static String formatHighLows(double high, double low) {
+    public static String formatHighLows(double high, double low, ForecastRequest.RequestUnit unit) {
         // For presentation, assume the user doesn't care about tenths of a degree.
+
+        if (unit.equals(ForecastRequest.RequestUnit.IMPERIAL)) {
+            high = (high * 1.8) + 32;
+            low = (low * 1.8) + 32;
+        }
+
         long roundedHigh = Math.round(high);
         long roundedLow = Math.round(low);
 
@@ -45,7 +57,7 @@ public final class JsonForecastUtil {
      * Fortunately parsing is easy: constructor takes the JSON string and converts it
      * into an Object hierarchy for us.
      */
-    public static String[] getWeatherDataFromJson(String forecastJsonStr, int numDays)
+    public static String[] getWeatherDataFromJson(String forecastJsonStr, int numDays, Context c)
             throws JSONException {
 
         // These are the names of the JSON objects that need to be extracted.
@@ -77,6 +89,12 @@ public final class JsonForecastUtil {
         dayTime = new Time();
 
         String[] resultStrs = new String[numDays];
+
+        // Data is fetched in celsius by default
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(c);
+        String unitType = preferences.getString(c.getString(R.string.pref_units_key), c.getString(R.string.pref_units_metric));
+        ForecastRequest.RequestUnit unit = ForecastRequest.RequestUnit.valueOf(unitType.toUpperCase());
+
         for (int i = 0; i < weatherArray.length(); i++) {
             // For now, using the format "Day, description, hi/low"
             String day;
@@ -104,7 +122,7 @@ public final class JsonForecastUtil {
             double high = temperatureObject.getDouble(OWM_MAX);
             double low = temperatureObject.getDouble(OWM_MIN);
 
-            highAndLow = formatHighLows(high, low);
+            highAndLow = formatHighLows(high, low, unit);
             resultStrs[i] = day + " - " + description + " - " + highAndLow;
         }
 

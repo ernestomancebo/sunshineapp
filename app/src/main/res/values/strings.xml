@@ -14,13 +14,24 @@
     <string name="refresh">Refresh</string>
     <string name="title_activity_detail">DetailActivity</string>
     <string name="hello_world">Hello world!</string>
+    <string name="open_location">Open Location</string>
 
     <!--Preferences Label-->
     <string name="pref_location_label">Location</string>
+    <string name="pref_units_label">Units</string>
+    <string name="pref_units_label_metric">Metric</string>
+    <string name="pref_units_label_imperial">Imperial</string>
+
     <!--Preferences keys-->
     <string name="pref_location_key" translatable="false">key_location</string>
     <string name="pref_units_key" translatable="false">key_units</string>
+
     <!--Preferences default-->
     <string name="pref_location_default" translatable="false">94043</string>
     <string name="pref_units_default" translatable="false">metric</string>
+
+    <!--Values for Strings-->
+    <string name="pref_units_metric">metric</string>
+    <string name="pref_units_imperial">imperial</string>
+
 </resources>

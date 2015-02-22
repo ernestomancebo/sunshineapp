@@ -1,11 +1,11 @@
 package com.flectosystems.sunshine.app;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -106,6 +106,26 @@ public class ForecastFragment extends Fragment {
         if (id == R.id.action_refresh) {
             updateWeather();
             return true;
+        } else if (id == R.id.action_open_location) {
+
+            // Read preferences
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String postCode = preferences.getString(
+                    getString(R.string.pref_location_key), getString(R.string.pref_location_default)
+            );
+
+            Uri geoLocation = new Uri.Builder()
+                    .scheme("geo")
+                    .appendEncodedPath("0,0?=" + postCode)
+                    .build();
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(geoLocation);
+
+            if (null != intent.resolveActivity(getActivity().getPackageManager())) {
+                startActivity(intent);
+            }
+
         }
 
         return super.onOptionsItemSelected(item);
@@ -113,8 +133,7 @@ public class ForecastFragment extends Fragment {
 
     public void updateWeather() {
         // Read preferences
-        SharedPreferences preferences = getActivity().getPreferences(Context.MODE_MULTI_PROCESS);
-
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String postCode = preferences.getString(
                 getString(R.string.pref_location_key), getString(R.string.pref_location_default)
         );
@@ -180,7 +199,7 @@ public class ForecastFragment extends Fragment {
                     forecastJsonStr = buffer.toString();
                 }
 
-                String[] rv = JsonForecastUtil.getWeatherDataFromJson(forecastJsonStr, 7);
+                String[] rv = JsonForecastUtil.getWeatherDataFromJson(forecastJsonStr, 7, getActivity());
                 Log.v(LOG_TAG, rv[1]);
 
                 return rv;
