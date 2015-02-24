@@ -12,9 +12,4 @@
         android:orderInCategory="100"
         android:title="@string/open_location"
         app:showAsAction="never" />
-    <item
-        android:id="@+id/action_share_forecast"
-        android:actionProviderClass="android.widget.ShareActionProvider"
-        app:showAsAction="ifRoom"
-        android:title="@string/share" />
 </menu>

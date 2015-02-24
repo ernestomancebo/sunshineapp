@@ -1,37 +1,46 @@
 package com.flectosystems.sunshine.app;
 
+import android.annotation.TargetApi;
+import android.app.Activity;
+import android.app.Fragment;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ShareActionProvider;
 import android.widget.TextView;
 
 
-public class DetailActivity extends ActionBarActivity {
+public class DetailActivity extends Activity {
+
+    private ShareActionProvider mShareActionProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
         if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
+            getFragmentManager().beginTransaction()
                     .add(R.id.container, new PlaceholderFragment())
                     .commit();
         }
 
-
     }
 
 
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_detail, menu);
+
+        MenuItem item = menu.findItem(R.id.action_share_forecast);
+        mShareActionProvider = (ShareActionProvider) item.getActionProvider();
+
         return true;
     }
 
@@ -48,9 +57,30 @@ public class DetailActivity extends ActionBarActivity {
             startActivity(intent);
 
             return true;
+        } else if (id == R.id.action_share_forecast) {
+            Intent shareIntent = new Intent();
+            shareIntent.setAction(Intent.ACTION_SEND);
+            shareIntent.setType("text/plain");
+
+            Intent intent = getIntent();
+            String message = intent.getStringExtra(Intent.EXTRA_TEXT);
+
+            if (null != message) {
+                shareIntent.putExtra(Intent.EXTRA_TEXT, message + " #SunshineApp");
+                setShareIntent(shareIntent);
+            }
+
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    private void setShareIntent(Intent shareIntent) {
+        if (null != mShareActionProvider) {
+            mShareActionProvider.setShareIntent(shareIntent);
+        }
     }
 
     /**
